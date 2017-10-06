@@ -7,6 +7,7 @@ rss_parse <- function(doc){
 
   channel <- xml2::xml_find_all(doc, "channel")
 
+
   if(identical(length(channel), 0L)){
     ns <- xml2::xml_ns_rename(xml2::xml_ns(doc), d1 = "rss")
     channel <- xml2::xml_find_all(doc, "rss:channel", ns = ns)
@@ -28,11 +29,7 @@ rss_parse <- function(doc){
       item_date =  xml2::xml_text(xml2::xml_find_first(site, "rss:date", ns = ns)) %>%
         lubridate::parse_date_time(orders = formats),
       item_subject = xml2::xml_text(xml2::xml_find_first(site, ns = ns, "rss:subject")),
-      item_category1 = xml2::xml_text(xml2::xml_find_first(site, "rss:category[1]", ns = ns)),
-      item_category2 = xml2::xml_text(xml2::xml_find_first(site, "rss:category[2]", ns = ns)),
-      item_category3 = xml2::xml_text(xml2::xml_find_first(site, "rss:category[3]", ns = ns)),
-      item_category4 = xml2::xml_text(xml2::xml_find_first(site, "rss:category[4]", ns = ns)),
-      item_category5 = xml2::xml_text(xml2::xml_find_first(site, "rss:category[5]", ns = ns)),
+      item_categories = xml2::xml_find_all(site, "rss:category/..", ns = ns) %>% lapply(function(item) xml2::xml_text(xml2::xml_find_all(item, "rss:category", ns = ns))),
       item_link = xml2::xml_text(xml2::xml_find_all(site, "rss:link", ns = ns)),
       item_description = xml2::xml_text(xml2::xml_find_first(site, "rss:description", ns = ns))
     )})
@@ -55,12 +52,9 @@ rss_parse <- function(doc){
       item_title = xml2::xml_text(xml2::xml_find_first(site, "title")),
       item_creator = xml2::xml_text(xml2::xml_find_first(site, "dc:creator")),
       item_date_published = xml2::xml_text(xml2::xml_find_first(site, "pubDate")) %>%
-        lubridate::parse_date_time(orders = formats),
-      item_category1 = xml2::xml_text(xml2::xml_find_first(site, "category[1]")),
-      item_category2 = xml2::xml_text(xml2::xml_find_first(site, "category[2]")),
-      item_category3 = xml2::xml_text(xml2::xml_find_first(site, "category[3]")),
-      item_category4 = xml2::xml_text(xml2::xml_find_first(site, "category[4]")),
-      item_category5 = xml2::xml_text(xml2::xml_find_first(site, "category[5]")),
+      lubridate::parse_date_time(orders = formats),
+      item_categories = xml2::xml_find_all(site, "category/..") %>%
+        lapply(function(item) xml2::xml_text(xml2::xml_find_all(item, "category"))),
       item_link = xml2::xml_text(xml2::xml_find_first(site, "link"))
     )})
 
